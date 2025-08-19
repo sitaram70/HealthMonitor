@@ -1,0 +1,39 @@
+# Full‑Stack Health Monitor (CPU‑only)
+
+## What you can demo
+- **Vitals stream** (CSV or API Mode)
+- **Final test:** Upload a short video → backend returns **fall/normal** with a score
+
+## Setup
+```bash
+pip install -r requirements.txt
+# optional: generate vitals
+python src/simulate_vitals.py --out data/vitals/vitals_train.csv --minutes 120
+# start API
+uvicorn src.api:app --reload --port 8000
+# start UI
+streamlit run streamlit_app/app.py
+```
+
+Switch the sidebar to **API Mode** and set `http://localhost:8000`.
+
+## Train baselines (optional but recommended)
+```bash
+python src/preprocess_video.py --video data/raw/toy/toy_fall_sim.mp4 --out data/raw/toy/frames
+python src/train_baselines.py --vitals data/vitals/vitals_train.csv --frames_dir data/raw/toy/frames --model_out models
+```
+The API will auto‑load:
+- `models/vitals_baseline.joblib`
+- `models/video_baseline_rf.joblib`
+
+If not present, it falls back to **rule‑based** predictions.
+
+## Docker
+```bash
+docker compose up --build
+# UI: http://localhost:8501  API: http://localhost:8000
+```
+
+## Notes
+- Keep uploaded clips short (≤ 20–30s). CPU feature extraction uses simple frame stats and a RandomForest (if trained).
+- For real datasets (URFD/SisFall/UP‑Fall), see `src/fetch_urfd.py` and review licenses.

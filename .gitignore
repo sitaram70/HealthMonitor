@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+
+# Data (keep structure, ignore heavy/raw)
+data/raw/**
+!data/raw/toy/
+data/vitals/**
+!data/vitals/*.example.csv
+
+# Models (keep placeholder)
+models/**
+!models/.gitkeep
+
+# Logs & builds
+*.log
+dist/
+build/
+.env
+*.zip
