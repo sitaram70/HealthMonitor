@@ -10,11 +10,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Needed so opencv-python can import cv2 on Ubuntu
+      # Needed so opencv-python can import cv2 on Ubuntu runners
       - name: Install system libs
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1
+          sudo apt-get install -y libgl1 libglib2.0-0
 
       - uses: actions/setup-python@v5
         with:
@@ -26,25 +26,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Smoke tests (imports + vitals simulate)
+      - name: Smoke tests (imports + vitals simulate + Streamlit syntax)
+        env:
+          PYTHONPATH: .
         run: |
           python - <<'PY'
-          import importlib
-          mods = [
-            "src.api",
-            "src.inference",
-            "src.simulate_vitals",
-            "streamlit_app.app",
-          ]
-          for m in mods:
-            importlib.import_module(m)
-            print(f"✅ imported {m}")
+          import importlib, py_compile, sys
+          # Import backend modules (should succeed)
+          for m in ["src.api", "src.inference", "src.simulate_vitals"]:
+              importlib.import_module(m)
+              print(f"✅ imported {m}")
 
-          # quick vitals simulate sanity check
+          # Quick vitals generation sanity check
           from src.simulate_vitals import simulate
           df = simulate(minutes=1, seed=1, anomaly_prob=0.1)
           assert not df.empty
           required = {"timestamp","heart_rate_bpm","temp_c","risk_event"}
           assert required.issubset(df.columns)
           print("✅ vitals simulate OK")
+
+          # Do NOT import the Streamlit app (it executes UI code on import)
+          # Instead, ensure it is syntactically valid
+          py_compile.compile("streamlit_app/app.py", doraise=True)
+          print("✅ streamlit_app/app.py syntax OK")
           PY
