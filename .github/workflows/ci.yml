@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Needed so opencv-python can import cv2 on Ubuntu
+      - name: Install system libs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Smoke tests (imports + vitals simulate)
+        run: |
+          python - <<'PY'
+          import importlib
+          mods = [
+            "src.api",
+            "src.inference",
+            "src.simulate_vitals",
+            "streamlit_app.app",
+          ]
+          for m in mods:
+            importlib.import_module(m)
+            print(f"✅ imported {m}")
+
+          # quick vitals simulate sanity check
+          from src.simulate_vitals import simulate
+          df = simulate(minutes=1, seed=1, anomaly_prob=0.1)
+          assert not df.empty
+          required = {"timestamp","heart_rate_bpm","temp_c","risk_event"}
+          assert required.issubset(df.columns)
+          print("✅ vitals simulate OK")
+          PY
