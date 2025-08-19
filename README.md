@@ -1,3 +1,5 @@
+[![CI](https://github.com/sitaram70/HealthMonitor/actions/workflows/ci.yml/badge.svg)](https://github.com/sitaram70/HealthMonitor/actions/workflows/ci.yml)
+
 # AI-Powered Health Monitoring (CPU-only)
 
 **Streamlit + FastAPI** app for vitals monitoring and fall detection. Designed to run on laptops with **CPU only** (no GPU required).
