@@ -152,4 +152,4 @@ Place PNGs in `docs/img/` and reference here, e.g.:
 ---
 
 ## License
-Choose a license (MIT is common for class projects). Create `LICENSE` at the repo root.
+MIT © 2025 Sitaram Ayyagari. See [LICENSE](./LICENSE) for details.
